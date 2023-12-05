@@ -20,6 +20,7 @@ include(Catch)
 add_executable(tml_test
     source/face.test.cpp
     source/mesh.test.cpp
+    source/vec3.test.cpp
     source/vertex.test.cpp
 )
 target_link_libraries(
