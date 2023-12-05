@@ -1,5 +1,7 @@
 #include "tml/mesh.hpp"
 
+#include "tml/vec3.hpp" // tml::vec3
+
 #include <charconv> // std::from_chars
 #include <fmt/format.h> // fmt::format
 #include <fstream> // std::ifstream
@@ -20,6 +22,25 @@ mesh::mesh(std::filesystem::path const& filepath)
 auto mesh::get_vertices() const noexcept -> std::vector<vertex> const& { return m_vertices; }
 
 auto mesh::get_faces() const noexcept -> std::vector<face> const& { return m_faces; }
+
+auto mesh::surface_area() const noexcept -> float
+{
+    float area{0.0F};
+
+    for (auto const& face : m_faces)
+    {
+        auto const [index_v1, index_v2, index_v3] = face.get_indices();
+        vec3 const v1{m_vertices[index_v1].x(), m_vertices[index_v1].y(), m_vertices[index_v1].z()};
+        vec3 const v2{m_vertices[index_v2].x(), m_vertices[index_v2].y(), m_vertices[index_v2].z()};
+        vec3 const v3{m_vertices[index_v3].x(), m_vertices[index_v3].y(), m_vertices[index_v3].z()};
+        vec3 const edge1{v2.x() - v1.x(), v2.y() - v1.y(), v2.z() - v1.z()};
+        vec3 const edge2{v3.x() - v1.x(), v3.y() - v1.y(), v3.z() - v1.z()};
+
+        area += 0.5F * edge1.cross(edge2).norm();
+    }
+
+    return area;
+}
 
 auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code
 {

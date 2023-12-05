@@ -21,6 +21,8 @@ namespace tml
 
         auto get_faces() const noexcept -> std::vector<face> const&;
 
+        auto surface_area() const noexcept -> float;
+
         auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
 
     private:
