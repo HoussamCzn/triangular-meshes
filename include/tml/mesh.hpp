@@ -15,8 +15,6 @@ namespace tml
     {
     public:
 
-        mesh() noexcept = default;
-
         explicit mesh(std::filesystem::path const& filepath);
 
         auto get_vertices() const noexcept -> std::vector<vertex> const&;
