@@ -17,6 +17,7 @@ add_library(libtml
     source/face.cpp
     source/mesh.cpp
     source/vertex.cpp
+    source/vec3.cpp
 )
 add_library(tml::tml ALIAS libtml)
 
