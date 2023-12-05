@@ -1,0 +1,13 @@
+#include <catch2/catch_test_macros.hpp>
+#include <tml/face.hpp>
+
+TEST_CASE("Faces tests", "[library]")
+{
+    SECTION("Successfully create a face")
+    {
+        tml::face const face{0, 1, 2};
+        REQUIRE(face.get_indices()[0] == 0);
+        REQUIRE(face.get_indices()[1] == 1);
+        REQUIRE(face.get_indices()[2] == 2);
+    }   
+}
