@@ -9,7 +9,6 @@
 
 using tml::face;
 using tml::mesh;
-using tml::vec3;
 using tml::vertex;
 
 mesh::mesh(std::filesystem::path const& filepath)

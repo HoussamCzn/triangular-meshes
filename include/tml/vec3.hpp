@@ -2,8 +2,6 @@
 
 #include "tml/config.hpp" // TML_EXPORT
 
-#include <cmath> // For sqrt and pow
-
 namespace tml
 {
     class TML_EXPORT [[nodiscard]] vec3
