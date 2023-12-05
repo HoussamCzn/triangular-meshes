@@ -56,22 +56,17 @@ auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const
 
 auto mesh::load(std::filesystem::path const& filepath) noexcept -> error_code
 {
-    if (!std::filesystem::exists(filepath)) [[unlikely]]
-    {
-        return error_code::file_not_found;
-    }
-
     std::ifstream file{filepath};
 
     if (!file) [[unlikely]]
     {
-        return error_code::unknown_io_error;
+        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
     }
 
-    static constexpr int vertex_count_offset{15};
-    static constexpr int face_count_offset{13};
-    std::size_t vertex_count{0};
-    std::size_t face_count{0};
+    static constexpr std::ptrdiff_t vertex_count_offset{15};
+    static constexpr std::ptrdiff_t face_count_offset{13};
+    std::size_t vertex_count{0UL};
+    std::size_t face_count{0UL};
     std::string line;
 
     while (std::getline(file, line))
@@ -95,7 +90,7 @@ auto mesh::load(std::filesystem::path const& filepath) noexcept -> error_code
     m_vertices.reserve(vertex_count);
     m_faces.reserve(face_count);
 
-    for (std::size_t i{0}; i < vertex_count; ++i)
+    for (std::size_t i{0UL}; i < vertex_count; ++i)
     {
         float x{0.0F};
         float y{0.0F};
@@ -104,16 +99,20 @@ auto mesh::load(std::filesystem::path const& filepath) noexcept -> error_code
         m_vertices.emplace_back(x, y, z);
     }
 
-    for (std::size_t i{0}; i < face_count; ++i)
+    for (std::size_t i{0UL}; i < face_count; ++i)
     {
-        std::size_t v1{0};
-        std::size_t v2{0};
-        std::size_t v3{0};
+        std::size_t v1{0UL};
+        std::size_t v2{0UL};
+        std::size_t v3{0UL};
         file >> vertex_count >> v1 >> v2 >> v3;
         m_faces.emplace_back(v1, v2, v3);
-        m_vertices[v1].add_adjacent(vertex_count);
-        m_vertices[v2].add_adjacent(vertex_count);
-        m_vertices[v3].add_adjacent(vertex_count);
+
+        m_vertices[v1].add_adjacent(v2);
+        m_vertices[v1].add_adjacent(v3);
+        m_vertices[v2].add_adjacent(v1);
+        m_vertices[v2].add_adjacent(v3);
+        m_vertices[v3].add_adjacent(v1);
+        m_vertices[v3].add_adjacent(v2);
     }
 
     return error_code::none;
