@@ -25,16 +25,10 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Save a mesh to a PLY file that already exists")
     {
         tml::mesh const mesh{"input.ply"};
-        
-        WHEN("Overwriting is allowed")
-        {
-            REQUIRE(mesh.save("output.ply", true) == tml::error_code::none);
-        }
 
-        WHEN("Overwriting is not allowed")
-        {
-            REQUIRE(mesh.save("output.ply", false) == tml::error_code::file_already_exists);
-        }
+        WHEN("Overwriting is allowed") { REQUIRE(mesh.save("output.ply", true) == tml::error_code::none); }
+
+        WHEN("Overwriting is not allowed") { REQUIRE(mesh.save("output.ply", false) == tml::error_code::file_already_exists); }
     }
 
     SECTION("Check the adjacent vertices of a vertex")
@@ -49,5 +43,11 @@ TEST_CASE("Meshes tests", "[library]")
         REQUIRE(vertices[5].adjacents().size() == 5UL);
         REQUIRE(vertices[6].adjacents().size() == 5UL);
         REQUIRE(vertices[7].adjacents().size() == 4UL);
+    }
+
+    SECTION("Check the surface area of a mesh")
+    {
+        tml::mesh const mesh{"input.ply"};
+        REQUIRE(mesh.surface_area() == 24.0F);
     }
 }
