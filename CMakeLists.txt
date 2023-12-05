@@ -14,7 +14,9 @@ include(cmake/variables.cmake)
 # ---- Declare library ----
 
 add_library(libtml
-    source/tml.cpp
+    source/face.cpp
+    source/mesh.cpp
+    source/vertex.cpp
 )
 add_library(tml::tml ALIAS libtml)
 
