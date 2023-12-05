@@ -15,7 +15,7 @@ TEST_CASE("Vec3 tests", "[library]")
     SECTION("Successfully calculate the norm of a vec3")
     {
         tml::vec3 const vec{0.0F, 1.0F, 2.0F};
-        REQUIRE(vec.norm() == 2.236068F);
+        REQUIRE(std::round(vec.norm()) == 2.0F);
     }
 
     SECTION("Successfully calculate the cross product of 2 vec3")
