@@ -6,6 +6,8 @@
 
 namespace tml
 {
+    class vec3;
+
     class TML_EXPORT vertex
     {
     public:
@@ -18,13 +20,15 @@ namespace tml
 
         [[nodiscard]] auto z() const noexcept -> float;
 
-        [[nodiscard]] auto adjacents() const noexcept -> std::vector<std::size_t> const&;
+        auto translate(vec3 const& offset) noexcept -> vertex&;
 
-        auto add_adjacent(std::size_t index) noexcept -> void;
+        [[nodiscard]] auto neighbors() const noexcept -> std::vector<std::size_t> const&;
+
+        auto add_neighbor(std::size_t index) noexcept -> void;
 
     private:
 
         float m_x, m_y, m_z;
-        std::vector<std::size_t> m_adjacent;
+        std::vector<std::size_t> m_neighbors;
     };
 } // namespace tml
