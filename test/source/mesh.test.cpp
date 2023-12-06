@@ -54,7 +54,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully center a mesh")
     {
         tml::mesh mesh{"uncentered_input.ply"};
-        mesh.center_mesh();
+        mesh.center();
         auto const& vertices = mesh.vertices();
         REQUIRE(vertices[0].x() == -1.0F);
         REQUIRE(vertices[0].y() == -1.0F);

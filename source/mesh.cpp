@@ -42,7 +42,7 @@ auto mesh::surface_area() const noexcept -> float
     return area;
 }
 
-auto mesh::center_mesh() noexcept -> mesh&
+auto mesh::center() noexcept -> mesh&
 {
     vec3 min{m_vertices.front().x(), m_vertices.front().y(), m_vertices.front().z()};
     vec3 max{min};
@@ -63,7 +63,7 @@ auto mesh::center_mesh() noexcept -> mesh&
     return *this;
 }
 
-auto mesh::invert_normals() noexcept -> mesh&
+auto mesh::invert() noexcept -> mesh&
 {
     for (auto& face : m_faces)
     {
