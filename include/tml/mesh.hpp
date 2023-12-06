@@ -29,6 +29,8 @@ namespace tml
 
         auto scale(float factor) noexcept -> mesh&;
 
+        auto noise(float coefficient) noexcept -> mesh&;
+
         [[nodiscard]] auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
 
     private:

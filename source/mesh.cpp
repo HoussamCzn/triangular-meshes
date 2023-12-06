@@ -5,6 +5,7 @@
 #include <charconv> // std::from_chars
 #include <fmt/format.h> // fmt::format
 #include <fstream> // std::ifstream
+#include <random> // std::mt19937, std::uniform_real_distribution, std::random_device
 #include <stdexcept> // std::runtime_error
 
 using tml::face;
@@ -78,6 +79,19 @@ auto mesh::scale(float factor) noexcept -> mesh&
     for (auto& vertex : m_vertices)
     {
         vertex.scale(factor);
+    }
+
+    return *this;
+}
+
+auto mesh::noise(float coefficient) noexcept -> mesh&
+{
+    std::mt19937 generator{std::random_device{}()};
+    std::uniform_real_distribution<float> distribution{-coefficient, coefficient};
+
+    for (auto& vertex : m_vertices)
+    {
+        vertex.translate(vec3{distribution(generator), distribution(generator), distribution(generator)});
     }
 
     return *this;
