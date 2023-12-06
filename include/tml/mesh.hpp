@@ -27,6 +27,8 @@ namespace tml
 
         auto invert() noexcept -> mesh&;
 
+        auto scale(float factor) noexcept -> mesh&;
+
         [[nodiscard]] auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
 
     private:

@@ -22,6 +22,8 @@ namespace tml
 
         auto translate(vec3 const& offset) noexcept -> vertex&;
 
+        auto scale(float factor) noexcept -> vertex&;
+
         [[nodiscard]] auto neighbors() const noexcept -> std::vector<std::size_t> const&;
 
         auto add_neighbor(std::size_t index) noexcept -> void;

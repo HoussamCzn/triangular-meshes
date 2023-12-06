@@ -32,6 +32,15 @@ auto vertex::translate(vec3 const& offset) noexcept -> vertex&
     return *this;
 }
 
+auto vertex::scale(float factor) noexcept -> vertex&
+{
+    m_x *= factor;
+    m_y *= factor;
+    m_z *= factor;
+
+    return *this;
+}
+
 [[nodiscard]]
 
 auto vertex::neighbors() const noexcept -> std::vector<std::size_t> const&

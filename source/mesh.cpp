@@ -73,6 +73,16 @@ auto mesh::invert() noexcept -> mesh&
     return *this;
 }
 
+auto mesh::scale(float factor) noexcept -> mesh&
+{
+    for (auto& vertex : m_vertices)
+    {
+        vertex.scale(factor);
+    }
+
+    return *this;
+}
+
 auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code
 {
     if (!can_overwrite && std::filesystem::exists(filepath)) [[unlikely]]
