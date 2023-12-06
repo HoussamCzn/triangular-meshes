@@ -6,7 +6,9 @@ face::face(std::size_t v1, std::size_t v2, std::size_t v3) noexcept : m_indices{
 
 auto face::get_indices() const noexcept -> std::array<std::size_t, 3> const& { return m_indices; }
 
-auto face::invert() noexcept -> void
+auto face::invert() noexcept -> face&
 {
     std::swap(m_indices[0], m_indices[2]);
+
+    return *this;
 }

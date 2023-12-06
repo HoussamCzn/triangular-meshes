@@ -11,25 +11,25 @@
 
 namespace tml
 {
-    class TML_EXPORT [[nodiscard]] mesh
+    class TML_EXPORT mesh
     {
     public:
 
         explicit mesh(std::filesystem::path const& filepath);
 
-        auto get_vertices() const noexcept -> std::vector<vertex> const&;
+        [[nodiscard]] auto get_vertices() const noexcept -> std::vector<vertex> const&;
 
-        auto get_faces() const noexcept -> std::vector<face> const&;
+        [[nodiscard]] auto get_faces() const noexcept -> std::vector<face> const&;
 
-        auto surface_area() const noexcept -> float;
+        [[nodiscard]] auto surface_area() const noexcept -> float;
 
-        auto invert_normals() noexcept -> void;
+        auto invert_normals() noexcept -> mesh&;
 
-        auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
+        [[nodiscard]] auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
 
     private:
 
-        auto load(std::filesystem::path const& filepath) noexcept -> error_code;
+        [[nodiscard]] auto load(std::filesystem::path const& filepath) noexcept -> error_code;
 
         std::vector<vertex> m_vertices;
         std::vector<face> m_faces;

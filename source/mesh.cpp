@@ -42,12 +42,14 @@ auto mesh::surface_area() const noexcept -> float
     return area;
 }
 
-auto mesh::invert_normals() noexcept -> void
+auto mesh::invert_normals() noexcept -> mesh&
 {
     for (auto& face : m_faces)
     {
         face.invert();
     }
+
+    return *this;
 }
 
 auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code

@@ -14,7 +14,7 @@ namespace tml
 
         [[nodiscard]] auto get_indices() const noexcept -> std::array<std::size_t, 3> const&;
 
-        auto invert() noexcept -> void;
+        auto invert() noexcept -> face&;
 
     private:
 
