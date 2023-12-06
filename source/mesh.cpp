@@ -42,6 +42,27 @@ auto mesh::surface_area() const noexcept -> float
     return area;
 }
 
+auto mesh::center_mesh() noexcept -> mesh&
+{
+    vec3 min{m_vertices.front().x(), m_vertices.front().y(), m_vertices.front().z()};
+    vec3 max{min};
+
+    for (auto const& vertex : m_vertices)
+    {
+        min = vec3{std::min(min.x(), vertex.x()), std::min(min.y(), vertex.y()), std::min(min.z(), vertex.z())};
+        max = vec3{std::max(max.x(), vertex.x()), std::max(max.y(), vertex.y()), std::max(max.z(), vertex.z())};
+    }
+
+    vec3 const center{(max + min) * 0.5F};
+
+    for (auto& vertex : m_vertices)
+    {
+        vertex.translate(-center);
+    }
+
+    return *this;
+}
+
 auto mesh::invert_normals() noexcept -> mesh&
 {
     for (auto& face : m_faces)
@@ -138,12 +159,12 @@ auto mesh::load(std::filesystem::path const& filepath) noexcept -> error_code
         file >> vertex_count >> v1 >> v2 >> v3;
         m_faces.emplace_back(v1, v2, v3);
 
-        m_vertices[v1].add_adjacent(v2);
-        m_vertices[v1].add_adjacent(v3);
-        m_vertices[v2].add_adjacent(v1);
-        m_vertices[v2].add_adjacent(v3);
-        m_vertices[v3].add_adjacent(v1);
-        m_vertices[v3].add_adjacent(v2);
+        m_vertices[v1].add_neighbor(v2);
+        m_vertices[v1].add_neighbor(v3);
+        m_vertices[v2].add_neighbor(v1);
+        m_vertices[v2].add_neighbor(v3);
+        m_vertices[v3].add_neighbor(v1);
+        m_vertices[v3].add_neighbor(v2);
     }
 
     return error_code::none;

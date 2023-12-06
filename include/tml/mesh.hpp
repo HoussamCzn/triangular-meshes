@@ -23,6 +23,8 @@ namespace tml
 
         [[nodiscard]] auto surface_area() const noexcept -> float;
 
+        auto center_mesh() noexcept -> mesh&;
+
         auto invert_normals() noexcept -> mesh&;
 
         [[nodiscard]] auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
