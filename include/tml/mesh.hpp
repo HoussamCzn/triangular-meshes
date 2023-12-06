@@ -17,9 +17,9 @@ namespace tml
 
         explicit mesh(std::filesystem::path const& filepath);
 
-        [[nodiscard]] auto get_vertices() const noexcept -> std::vector<vertex> const&;
+        [[nodiscard]] auto vertices() const noexcept -> std::vector<vertex> const&;
 
-        [[nodiscard]] auto get_faces() const noexcept -> std::vector<face> const&;
+        [[nodiscard]] auto faces() const noexcept -> std::vector<face> const&;
 
         [[nodiscard]] auto surface_area() const noexcept -> float;
 

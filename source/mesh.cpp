@@ -19,9 +19,9 @@ mesh::mesh(std::filesystem::path const& filepath)
     }
 }
 
-auto mesh::get_vertices() const noexcept -> std::vector<vertex> const& { return m_vertices; }
+auto mesh::vertices() const noexcept -> std::vector<vertex> const& { return m_vertices; }
 
-auto mesh::get_faces() const noexcept -> std::vector<face> const& { return m_faces; }
+auto mesh::faces() const noexcept -> std::vector<face> const& { return m_faces; }
 
 auto mesh::surface_area() const noexcept -> float
 {
@@ -29,7 +29,7 @@ auto mesh::surface_area() const noexcept -> float
 
     for (auto const& face : m_faces)
     {
-        auto const [index_v1, index_v2, index_v3] = face.get_indices();
+        auto const [index_v1, index_v2, index_v3] = face.indices();
         vec3 const v1{m_vertices[index_v1].x(), m_vertices[index_v1].y(), m_vertices[index_v1].z()};
         vec3 const v2{m_vertices[index_v2].x(), m_vertices[index_v2].y(), m_vertices[index_v2].z()};
         vec3 const v3{m_vertices[index_v3].x(), m_vertices[index_v3].y(), m_vertices[index_v3].z()};
@@ -78,7 +78,7 @@ auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const
 
     for (auto const& face : m_faces)
     {
-        std::array indices = face.get_indices();
+        std::array indices = face.indices();
         file << fmt::format("3 {} {} {}\n", indices[0], indices[1], indices[2]);
     }
 

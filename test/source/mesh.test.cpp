@@ -7,8 +7,8 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully load a valid PLY file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.get_vertices().size() == 8UL);
-        REQUIRE(mesh.get_faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+        REQUIRE(mesh.faces().size() == 12UL);
     }
 
     SECTION("Successfully save a mesh to a PLY file")
@@ -18,8 +18,8 @@ TEST_CASE("Meshes tests", "[library]")
 
         std::ifstream const file{"output.ply"};
         REQUIRE(file.good());
-        REQUIRE(mesh.get_vertices().size() == 8UL);
-        REQUIRE(mesh.get_faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+        REQUIRE(mesh.faces().size() == 12UL);
     }
 
     SECTION("Save a mesh to a PLY file that already exists")
@@ -34,7 +34,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Check the adjacent vertices of a vertex")
     {
         tml::mesh const mesh{"input.ply"};
-        auto const& vertices = mesh.get_vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(vertices[0].adjacents().size() == 5UL);
         REQUIRE(vertices[1].adjacents().size() == 4UL);
         REQUIRE(vertices[2].adjacents().size() == 4UL);
