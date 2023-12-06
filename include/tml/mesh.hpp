@@ -21,7 +21,7 @@ namespace tml
 
         [[nodiscard]] auto faces() const noexcept -> std::vector<face> const&;
 
-        [[nodiscard]] auto surface_area() const noexcept -> float;
+        [[nodiscard]] auto area() const noexcept -> float;
 
         auto center() noexcept -> mesh&;
 

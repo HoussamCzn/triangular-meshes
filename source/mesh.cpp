@@ -24,7 +24,7 @@ auto mesh::vertices() const noexcept -> std::vector<vertex> const& { return m_ve
 
 auto mesh::faces() const noexcept -> std::vector<face> const& { return m_faces; }
 
-auto mesh::surface_area() const noexcept -> float
+auto mesh::area() const noexcept -> float
 {
     float area{0.0F};
 

@@ -48,7 +48,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Check the surface area of a mesh")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.surface_area() == 24.0F);
+        REQUIRE(mesh.area() == 24.0F);
     }
 
     SECTION("Successfully center a mesh")
