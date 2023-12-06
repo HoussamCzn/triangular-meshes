@@ -37,6 +37,15 @@ auto tml::operator-(vec3 const& lhs, vec3 const& rhs) noexcept -> vec3
     return {lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z()};
 }
 
+auto tml::operator-(vec3 const& rhs) noexcept -> vec3 { return {-rhs.x(), -rhs.y(), -rhs.z()}; }
+
+auto tml::operator*(vec3 const& lhs, float scalar) noexcept -> vec3
+{
+    return {lhs.x() * scalar, lhs.y() * scalar, lhs.z() * scalar};
+}
+
+auto tml::operator*(float scalar, vec3 const& rhs) noexcept -> vec3 { return rhs * scalar; }
+
 auto tml::operator+=(vec3& lhs, vec3 const& rhs) noexcept -> vec3&
 {
     lhs.m_x += rhs.m_x;
@@ -51,6 +60,15 @@ auto tml::operator-=(vec3& lhs, vec3 const& rhs) noexcept -> vec3&
     lhs.m_x -= rhs.m_x;
     lhs.m_y -= rhs.m_y;
     lhs.m_z -= rhs.m_z;
+
+    return lhs;
+}
+
+auto tml::operator*=(vec3& lhs, float scalar) noexcept -> vec3&
+{
+    lhs.m_x *= scalar;
+    lhs.m_y *= scalar;
+    lhs.m_z *= scalar;
 
     return lhs;
 }
