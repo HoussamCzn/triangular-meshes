@@ -23,6 +23,8 @@ namespace tml
 
         auto surface_area() const noexcept -> float;
 
+        auto invert_normals() noexcept -> void;
+
         auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
 
     private:
