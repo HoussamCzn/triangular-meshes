@@ -29,4 +29,13 @@ TEST_CASE("Vertices tests", "[library]")
         REQUIRE(vertex.y() == 5.0F);
         REQUIRE(vertex.z() == 7.0F);
     }
+
+    SECTION("Successfully scale a vertex")
+    {
+        tml::vertex vertex{0.0F, 1.0F, 2.0F};
+        vertex.scale(2.0F);
+        REQUIRE(vertex.x() == 0.0F);
+        REQUIRE(vertex.y() == 2.0F);
+        REQUIRE(vertex.z() == 4.0F);
+    }
 }

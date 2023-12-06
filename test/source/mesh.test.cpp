@@ -81,4 +81,35 @@ TEST_CASE("Meshes tests", "[library]")
         REQUIRE(vertices[7].y() == 1.0F);
         REQUIRE(vertices[7].z() == 1.0F);
     }
+
+    SECTION("Successfully scale a mesh")
+    {
+        tml::mesh mesh{"input.ply"};
+        mesh.scale(2.0F);
+        auto const& vertices = mesh.vertices();
+        REQUIRE(vertices[0].x() == -2.0F);
+        REQUIRE(vertices[0].y() == -2.0F);
+        REQUIRE(vertices[0].z() == -2.0F);
+        REQUIRE(vertices[1].x() == 2.0F);
+        REQUIRE(vertices[1].y() == -2.0F);
+        REQUIRE(vertices[1].z() == -2.0F);
+        REQUIRE(vertices[2].x() == -2.0F);
+        REQUIRE(vertices[2].y() == 2.0F);
+        REQUIRE(vertices[2].z() == -2.0F);
+        REQUIRE(vertices[3].x() == 2.0F);
+        REQUIRE(vertices[3].y() == 2.0F);
+        REQUIRE(vertices[3].z() == -2.0F);
+        REQUIRE(vertices[4].x() == -2.0F);
+        REQUIRE(vertices[4].y() == -2.0F);
+        REQUIRE(vertices[4].z() == 2.0F);
+        REQUIRE(vertices[5].x() == 2.0F);
+        REQUIRE(vertices[5].y() == -2.0F);
+        REQUIRE(vertices[5].z() == 2.0F);
+        REQUIRE(vertices[6].x() == -2.0F);
+        REQUIRE(vertices[6].y() == 2.0F);
+        REQUIRE(vertices[6].z() == 2.0F);
+        REQUIRE(vertices[7].x() == 2.0F);
+        REQUIRE(vertices[7].y() == 2.0F);
+        REQUIRE(vertices[7].z() == 2.0F);
+    }
 }
