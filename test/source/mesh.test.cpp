@@ -112,4 +112,23 @@ TEST_CASE("Meshes tests", "[library]")
         REQUIRE(vertices[7].y() == 2.0F);
         REQUIRE(vertices[7].z() == 2.0F);
     }
+
+    SECTION("Successfully invert a mesh")
+    {
+        tml::mesh mesh{"input.ply"};
+        mesh.invert();
+        auto const& faces = mesh.faces();
+        REQUIRE(faces[0].indices() == std::array{0UL, 1UL, 3UL});
+        REQUIRE(faces[1].indices() == std::array{0UL, 3UL, 2UL});
+        REQUIRE(faces[2].indices() == std::array{1UL, 7UL, 3UL});
+        REQUIRE(faces[3].indices() == std::array{7UL, 1UL, 5UL});
+        REQUIRE(faces[4].indices() == std::array{7UL, 5UL, 6UL});
+        REQUIRE(faces[5].indices() == std::array{4UL, 6UL, 5UL});
+        REQUIRE(faces[6].indices() == std::array{2UL, 6UL, 4UL});
+        REQUIRE(faces[7].indices() == std::array{0UL, 2UL, 4UL});
+        REQUIRE(faces[8].indices() == std::array{3UL, 7UL, 6UL});
+        REQUIRE(faces[9].indices() == std::array{6UL, 2UL, 3UL});
+        REQUIRE(faces[10].indices() == std::array{0UL, 5UL, 1UL});
+        REQUIRE(faces[11].indices() == std::array{5UL, 0UL, 4UL});
+    }
 }
