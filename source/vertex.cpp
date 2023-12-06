@@ -41,8 +41,6 @@ auto vertex::scale(float factor) noexcept -> vertex&
     return *this;
 }
 
-[[nodiscard]]
-
 auto vertex::neighbors() const noexcept -> std::vector<std::size_t> const&
 {
     return m_neighbors;
