@@ -63,6 +63,25 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/input.ply
     "3 4 0 5\n"
 )
 
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/uncentered_input.ply
+    "ply\n"
+    "format ascii 1.0\n"
+    "comment original uncentered mesh\n"
+    "element vertex 8\n"
+    "property float x\n"
+    "property float y\n"
+    "property float z\n"
+    "end_header\n"
+    "0 0 0\n"
+    "2 0 0\n"
+    "0 2 0\n"
+    "2 2 0\n"
+    "0 0 2\n"
+    "2 0 2\n"
+    "0 2 2\n"
+    "2 2 2\n"
+)
+
 catch_discover_tests(tml_test)
 
 # ---- End-of-file commands ----

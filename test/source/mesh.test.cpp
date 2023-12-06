@@ -35,19 +35,50 @@ TEST_CASE("Meshes tests", "[library]")
     {
         tml::mesh const mesh{"input.ply"};
         auto const& vertices = mesh.vertices();
-        REQUIRE(vertices[0].adjacents().size() == 5UL);
-        REQUIRE(vertices[1].adjacents().size() == 4UL);
-        REQUIRE(vertices[2].adjacents().size() == 4UL);
-        REQUIRE(vertices[3].adjacents().size() == 5UL);
-        REQUIRE(vertices[4].adjacents().size() == 4UL);
-        REQUIRE(vertices[5].adjacents().size() == 5UL);
-        REQUIRE(vertices[6].adjacents().size() == 5UL);
-        REQUIRE(vertices[7].adjacents().size() == 4UL);
+        REQUIRE(vertices[0].neighbors().size() == 5UL);
+        REQUIRE(vertices[1].neighbors().size() == 4UL);
+        REQUIRE(vertices[2].neighbors().size() == 4UL);
+        REQUIRE(vertices[3].neighbors().size() == 5UL);
+        REQUIRE(vertices[4].neighbors().size() == 4UL);
+        REQUIRE(vertices[5].neighbors().size() == 5UL);
+        REQUIRE(vertices[6].neighbors().size() == 5UL);
+        REQUIRE(vertices[7].neighbors().size() == 4UL);
     }
 
     SECTION("Check the surface area of a mesh")
     {
         tml::mesh const mesh{"input.ply"};
         REQUIRE(mesh.surface_area() == 24.0F);
+    }
+
+    SECTION("Successfully center a mesh")
+    {
+        tml::mesh mesh{"uncentered_input.ply"};
+        mesh.center_mesh();
+        auto const& vertices = mesh.vertices();
+        REQUIRE(vertices[0].x() == -1.0F);
+        REQUIRE(vertices[0].y() == -1.0F);
+        REQUIRE(vertices[0].z() == -1.0F);
+        REQUIRE(vertices[1].x() == 1.0F);
+        REQUIRE(vertices[1].y() == -1.0F);
+        REQUIRE(vertices[1].z() == -1.0F);
+        REQUIRE(vertices[2].x() == -1.0F);
+        REQUIRE(vertices[2].y() == 1.0F);
+        REQUIRE(vertices[2].z() == -1.0F);
+        REQUIRE(vertices[3].x() == 1.0F);
+        REQUIRE(vertices[3].y() == 1.0F);
+        REQUIRE(vertices[3].z() == -1.0F);
+        REQUIRE(vertices[4].x() == -1.0F);
+        REQUIRE(vertices[4].y() == -1.0F);
+        REQUIRE(vertices[4].z() == 1.0F);
+        REQUIRE(vertices[5].x() == 1.0F);
+        REQUIRE(vertices[5].y() == -1.0F);
+        REQUIRE(vertices[5].z() == 1.0F);
+        REQUIRE(vertices[6].x() == -1.0F);
+        REQUIRE(vertices[6].y() == 1.0F);
+        REQUIRE(vertices[6].z() == 1.0F);
+        REQUIRE(vertices[7].x() == 1.0F);
+        REQUIRE(vertices[7].y() == 1.0F);
+        REQUIRE(vertices[7].z() == 1.0F);
     }
 }

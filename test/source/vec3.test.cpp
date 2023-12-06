@@ -67,4 +67,40 @@ TEST_CASE("Vec3 tests", "[library]")
         REQUIRE(vec1.y() == -3.0F);
         REQUIRE(vec1.z() == -3.0F);
     }
+
+    SECTION("Successfully multiply a vec3 by a scalar")
+    {
+        tml::vec3 const vec1{0.0F, 1.0F, 2.0F};
+        tml::vec3 const vec2{vec1 * 2.0F};
+        REQUIRE(vec2.x() == 0.0F);
+        REQUIRE(vec2.y() == 2.0F);
+        REQUIRE(vec2.z() == 4.0F);
+    }
+
+    SECTION("Successfully multiply a scalar by a vec3")
+    {
+        tml::vec3 const vec1{0.0F, 1.0F, 2.0F};
+        tml::vec3 const vec2{2.0F * vec1};
+        REQUIRE(vec2.x() == 0.0F);
+        REQUIRE(vec2.y() == 2.0F);
+        REQUIRE(vec2.z() == 4.0F);
+    }
+
+    SECTION("Successfully multiply a vec3 by a scalar and assign it to itself")
+    {
+        tml::vec3 vec1{0.0F, 1.0F, 2.0F};
+        vec1 *= 2.0F;
+        REQUIRE(vec1.x() == 0.0F);
+        REQUIRE(vec1.y() == 2.0F);
+        REQUIRE(vec1.z() == 4.0F);
+    }
+
+    SECTION("Successfully negate a vec3")
+    {
+        tml::vec3 const vec1{0.0F, 1.0F, 2.0F};
+        tml::vec3 const vec2{-vec1};
+        REQUIRE(vec2.x() == 0.0F);
+        REQUIRE(vec2.y() == -1.0F);
+        REQUIRE(vec2.z() == -2.0F);
+    }
 }
