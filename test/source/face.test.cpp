@@ -9,5 +9,14 @@ TEST_CASE("Faces tests", "[library]")
         REQUIRE(face.get_indices()[0] == 0);
         REQUIRE(face.get_indices()[1] == 1);
         REQUIRE(face.get_indices()[2] == 2);
-    }   
+    }
+
+    SECTION("Invert a face")
+    {
+        tml::face face{0, 1, 2};
+        face.invert();
+        REQUIRE(face.get_indices()[0] == 2);
+        REQUIRE(face.get_indices()[1] == 1);
+        REQUIRE(face.get_indices()[2] == 0);
+    }
 }
