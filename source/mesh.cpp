@@ -2,6 +2,8 @@
 
 #include "tml/vec3.hpp" // tml::vec3
 
+#include <algorithm> // std::min, std::max
+#include <bit> // std::bit_cast
 #include <charconv> // std::from_chars
 #include <fmt/format.h> // fmt::format
 #include <fstream> // std::ifstream
@@ -20,9 +22,9 @@ mesh::mesh(std::filesystem::path const& filepath)
     }
 }
 
-auto mesh::vertices() const noexcept -> std::vector<vertex> const& { return m_vertices; }
+auto mesh::vertices() const noexcept -> std::span<vertex const> { return m_vertices; }
 
-auto mesh::faces() const noexcept -> std::vector<face> const& { return m_faces; }
+auto mesh::faces() const noexcept -> std::span<face const> { return m_faces; }
 
 auto mesh::area() const noexcept -> float
 {
@@ -108,7 +110,7 @@ auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const
 
     if (!file) [[unlikely]]
     {
-        return error_code::unknown_io_error;
+        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
     }
 
     file << fmt::format(
@@ -118,13 +120,22 @@ auto mesh::save(std::filesystem::path const& filepath, bool can_overwrite) const
 
     for (auto const& vertex : m_vertices)
     {
-        file << fmt::format("{} {} {}\n", vertex.x(), vertex.y(), vertex.z());
+        float const x{vertex.x()};
+        float const y{vertex.y()};
+        float const z{vertex.z()};
+        file.write(std::bit_cast<char const*>(&x), sizeof(float));
+        file.write(std::bit_cast<char const*>(&y), sizeof(float));
+        file.write(std::bit_cast<char const*>(&z), sizeof(float));
+        file << '\n';
     }
 
     for (auto const& face : m_faces)
     {
-        std::array indices = face.indices();
-        file << fmt::format("3 {} {} {}\n", indices[0], indices[1], indices[2]);
+        auto const [index_v1, index_v2, index_v3] = face.indices();
+        file.write(std::bit_cast<char const*>(&index_v1), sizeof(decltype(index_v1)));
+        file.write(std::bit_cast<char const*>(&index_v2), sizeof(decltype(index_v2)));
+        file.write(std::bit_cast<char const*>(&index_v3), sizeof(decltype(index_v3)));
+        file << '\n';
     }
 
     return error_code::none;

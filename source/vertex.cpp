@@ -2,8 +2,6 @@
 
 #include "tml/vec3.hpp" // tml::vec3
 
-#include <ranges> // std::ranges::find
-
 using tml::vertex;
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
@@ -41,7 +39,4 @@ auto vertex::scale(float factor) noexcept -> vertex&
     return *this;
 }
 
-auto vertex::neighbors() const noexcept -> std::vector<std::size_t> const&
-{
-    return m_neighbors;
-}
+auto vertex::neighbors() const noexcept -> std::span<std::size_t const> { return m_neighbors; }

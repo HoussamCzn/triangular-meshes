@@ -6,7 +6,7 @@
 #include "tml/vertex.hpp" // tml::vertex
 
 #include <filesystem> // std::filesystem::path, std::filesystem::exists
-#include <string_view> // std::string_view
+#include <span> // std::span
 #include <vector> // std::vector
 
 namespace tml
@@ -17,9 +17,9 @@ namespace tml
 
         explicit mesh(std::filesystem::path const& filepath);
 
-        [[nodiscard]] auto vertices() const noexcept -> std::vector<vertex> const&;
+        [[nodiscard]] auto vertices() const noexcept -> std::span<vertex const>;
 
-        [[nodiscard]] auto faces() const noexcept -> std::vector<face> const&;
+        [[nodiscard]] auto faces() const noexcept -> std::span<face const>;
 
         [[nodiscard]] auto area() const noexcept -> float;
 
