@@ -11,9 +11,18 @@
 
 namespace tml
 {
+    enum class format
+    {
+        ply,
+        stl,
+        collada
+    };
+
     class TML_EXPORT mesh
     {
     public:
+
+        mesh() noexcept = default;
 
         explicit mesh(std::filesystem::path const& filepath);
 
@@ -31,22 +40,66 @@ namespace tml
 
         auto noise(float coefficient) noexcept -> mesh&;
 
-        [[nodiscard]] auto save_to_ply(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
+        template <format Format>
+        auto read(std::filesystem::path const& filepath) noexcept -> parse_error
+        {
+            if (filepath.empty()) [[unlikely]]
+            {
+                return parse_error{.code = error_code::invalid_filepath};
+            }
 
-        [[nodiscard]] auto save_to_stl(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
+            if constexpr (Format == format::ply)
+            {
+                return load_from_ply(filepath);
+            }
+            else if constexpr (Format == format::stl)
+            {
+                return load_from_stl(filepath);
+            }
+            else if constexpr (Format == format::collada)
+            {
+                return load_from_collada(filepath);
+            }
+        }
 
-        [[nodiscard]] auto save_to_collada(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
+        template <format Format>
+        auto write(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> write_error
+        {
+            if (filepath.empty()) [[unlikely]]
+            {
+                return write_error{.code = error_code::invalid_filepath};
+            }
+
+            if constexpr (Format == format::ply)
+            {
+                return save_to_ply(filepath, can_overwrite);
+            }
+            else if constexpr (Format == format::stl)
+            {
+                return save_to_stl(filepath, can_overwrite);
+            }
+            else if constexpr (Format == format::collada)
+            {
+                return save_to_collada(filepath, can_overwrite);
+            }
+        }
 
     private:
 
-        [[nodiscard]] auto load_from_ply(std::filesystem::path const& filepath) noexcept -> error_code;
+        [[nodiscard]] auto load_from_ply(std::filesystem::path const& filepath) noexcept -> parse_error;
 
-        [[nodiscard]] auto load_from_stl(std::filesystem::path const& filepath) noexcept -> error_code;
+        [[nodiscard]] auto load_from_stl(std::filesystem::path const& filepath) noexcept -> parse_error;
 
-        [[nodiscard]] auto load_from_collada(std::filesystem::path const& filepath) noexcept -> error_code;
+        [[nodiscard]] auto load_from_collada(std::filesystem::path const& filepath) noexcept -> parse_error;
+
+        [[nodiscard]] auto save_to_ply(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> write_error;
+
+        [[nodiscard]] auto save_to_stl(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> write_error;
+
+        [[nodiscard]] auto save_to_collada(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> write_error;
 
         std::vector<vertex> m_vertices;
         std::vector<face> m_faces;
