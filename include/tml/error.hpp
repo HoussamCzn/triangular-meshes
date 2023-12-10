@@ -17,11 +17,7 @@ namespace tml
     };
 
     static constexpr std::array errors{
-        "None"sv,
-        "File could not be found"sv,
-        "File already exists"sv,
-        "Unknown I/O error"sv,
-        "Invalid data"sv,
+        "None"sv, "File could not be found"sv, "File already exists"sv, "Unknown I/O error"sv, "Invalid data"sv,
     };
 
     [[nodiscard]] constexpr auto format_error(error_code const error) noexcept -> std::string_view
