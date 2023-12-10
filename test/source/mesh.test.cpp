@@ -4,31 +4,69 @@
 
 TEST_CASE("Meshes tests", "[library]")
 {
-    SECTION("Successfully load a valid PLY file")
-    {
-        tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.vertices().size() == 8UL);
-        REQUIRE(mesh.faces().size() == 12UL);
-    }
-
     SECTION("Successfully save a mesh to a PLY file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.save("output.ply", true) == tml::error_code::none);
+        REQUIRE(mesh.save_to_ply("output.ply", true) == tml::error_code::none);
 
         std::ifstream const file{"output.ply"};
         REQUIRE(file.good());
-        REQUIRE(mesh.vertices().size() == 8UL);
         REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+    }
+
+    SECTION("Successfully save a mesh to a STL file")
+    {
+        tml::mesh const mesh{"input.ply"};
+        REQUIRE(mesh.save_to_stl("output.stl", true) == tml::error_code::none);
+
+        std::ifstream const file{"output.stl"};
+        REQUIRE(file.good());
+        REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+    }
+
+    SECTION("Successfully save a mesh to a Collada file")
+    {
+        tml::mesh const mesh{"input.ply"};
+        REQUIRE(mesh.save_to_collada("output.dae", true) == tml::error_code::none);
+
+        std::ifstream const file{"output.dae"};
+        REQUIRE(file.good());
+        REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
     }
 
     SECTION("Save a mesh to a PLY file that already exists")
     {
         tml::mesh const mesh{"input.ply"};
 
-        WHEN("Overwriting is allowed") { REQUIRE(mesh.save("output.ply", true) == tml::error_code::none); }
+        WHEN("Overwriting is allowed") { REQUIRE(mesh.save_to_ply("output.ply", true) == tml::error_code::none); }
+        WHEN("Overwriting is not allowed")
+        {
+            REQUIRE(mesh.save_to_ply("output.ply", false) == tml::error_code::file_already_exists);
+        }
+    }
 
-        WHEN("Overwriting is not allowed") { REQUIRE(mesh.save("output.ply", false) == tml::error_code::file_already_exists); }
+    SECTION("Successfully load a valid PLY file")
+    {
+        tml::mesh const mesh{"output.ply"};
+        REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+    }
+
+    SECTION("Successfully load a valid STL file")
+    {
+        tml::mesh const mesh{"output.stl"};
+        REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
+    }
+
+    SECTION("Successfully load a valid Collada file")
+    {
+        tml::mesh const mesh{"output.dae"};
+        REQUIRE(mesh.faces().size() == 12UL);
+        REQUIRE(mesh.vertices().size() == 8UL);
     }
 
     SECTION("Check the adjacent vertices of a vertex")
