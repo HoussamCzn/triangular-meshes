@@ -21,13 +21,17 @@ namespace tml
 
         [[nodiscard]] auto z() const noexcept -> float;
 
+        [[nodiscard]] auto neighbors() const noexcept -> std::span<std::size_t const>;
+
         auto translate(vec3 const& offset) noexcept -> vertex&;
 
         auto scale(float factor) noexcept -> vertex&;
 
-        [[nodiscard]] auto neighbors() const noexcept -> std::span<std::size_t const>;
-
         auto add_neighbor(std::size_t index) noexcept -> void;
+
+        auto operator==(vertex const& other) const noexcept -> bool;
+
+        auto operator!=(vertex const& other) const noexcept -> bool;
 
     private:
 
@@ -35,3 +39,12 @@ namespace tml
         std::vector<std::size_t> m_neighbors;
     };
 } // namespace tml
+
+template <>
+struct std::hash<tml::vertex>
+{
+    auto operator()(tml::vertex const& vertex) const noexcept -> std::size_t
+    {
+        return std::hash<float>{}(vertex.x()) ^ std::hash<float>{}(vertex.y()) ^ std::hash<float>{}(vertex.z());
+    }
+};
