@@ -31,11 +31,22 @@ namespace tml
 
         auto noise(float coefficient) noexcept -> mesh&;
 
-        [[nodiscard]] auto save(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code;
+        [[nodiscard]] auto save_to_ply(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> error_code;
+
+        [[nodiscard]] auto save_to_stl(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> error_code;
+
+        [[nodiscard]] auto save_to_collada(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
+            -> error_code;
 
     private:
 
-        [[nodiscard]] auto load(std::filesystem::path const& filepath) noexcept -> error_code;
+        [[nodiscard]] auto load_from_ply(std::filesystem::path const& filepath) noexcept -> error_code;
+
+        [[nodiscard]] auto load_from_stl(std::filesystem::path const& filepath) noexcept -> error_code;
+
+        [[nodiscard]] auto load_from_collada(std::filesystem::path const& filepath) noexcept -> error_code;
 
         std::vector<vertex> m_vertices;
         std::vector<face> m_faces;
