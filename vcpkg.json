@@ -1,6 +1,6 @@
 {
   "name": "tml",
-  "version-semver": "1.0.0",
+  "version-semver": "1.0.1",
   "dependencies": [
     {
       "name": "fmt",
