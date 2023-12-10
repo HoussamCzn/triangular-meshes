@@ -59,6 +59,8 @@ target_compile_features(libtml PUBLIC cxx_std_20)
 
 find_package(fmt REQUIRED)
 target_link_libraries(libtml PRIVATE fmt::fmt)
+find_package(pugixml REQUIRED)
+target_link_libraries(libtml PRIVATE pugixml::static pugixml::pugixml)
 
 # ---- Install rules ----
 

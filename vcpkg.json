@@ -5,6 +5,10 @@
     {
       "name": "fmt",
       "version>=": "10.1.1"
+    },
+    {
+      "name": "pugixml",
+      "version>=": "1.14"
     }
   ],
   "default-features": [],
