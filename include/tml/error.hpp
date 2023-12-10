@@ -21,6 +21,16 @@ namespace tml
         return error == error_code::none;
     }
 
+    [[nodiscard]] constexpr auto operator==(error_code const lhs, error_code const rhs) noexcept -> bool
+    {
+        return static_cast<std::size_t>(lhs) == static_cast<std::size_t>(rhs);
+    }
+
+    [[nodiscard]] constexpr auto operator!=(error_code const lhs, error_code const rhs) noexcept -> bool
+    {
+        return !(lhs == rhs);
+    }
+
     static constexpr std::array errors{
         "None"sv, "File or directory does not exist"sv, "File already exists"sv, "Unknown I/O error"sv, "Invalid data"sv,
     };
