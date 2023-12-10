@@ -41,11 +41,11 @@ namespace tml
         auto noise(float coefficient) noexcept -> mesh&;
 
         template <format Format>
-        auto read(std::filesystem::path const& filepath) noexcept -> error_code
+        auto read(std::filesystem::path const& filepath) noexcept -> parse_error
         {
             if (filepath.empty()) [[unlikely]]
             {
-                return error_code::invalid_filepath;
+                return parse_error{.code = error_code::invalid_filepath};
             }
 
             if constexpr (Format == format::ply)
@@ -63,11 +63,11 @@ namespace tml
         }
 
         template <format Format>
-        auto write(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> error_code
+        auto write(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> write_error
         {
             if (filepath.empty()) [[unlikely]]
             {
-                return error_code::invalid_filepath;
+                return write_error{.code = error_code::invalid_filepath};
             }
 
             if constexpr (Format == format::ply)
@@ -86,20 +86,20 @@ namespace tml
 
     private:
 
+        [[nodiscard]] auto load_from_ply(std::filesystem::path const& filepath) noexcept -> parse_error;
+
+        [[nodiscard]] auto load_from_stl(std::filesystem::path const& filepath) noexcept -> parse_error;
+
+        [[nodiscard]] auto load_from_collada(std::filesystem::path const& filepath) noexcept -> parse_error;
+
         [[nodiscard]] auto save_to_ply(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
+            -> write_error;
 
         [[nodiscard]] auto save_to_stl(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
+            -> write_error;
 
         [[nodiscard]] auto save_to_collada(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept
-            -> error_code;
-
-        [[nodiscard]] auto load_from_ply(std::filesystem::path const& filepath) noexcept -> error_code;
-
-        [[nodiscard]] auto load_from_stl(std::filesystem::path const& filepath) noexcept -> error_code;
-
-        [[nodiscard]] auto load_from_collada(std::filesystem::path const& filepath) noexcept -> error_code;
+            -> write_error;
 
         std::vector<vertex> m_vertices;
         std::vector<face> m_faces;

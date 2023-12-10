@@ -1,5 +1,6 @@
 #include "tml/mesh.hpp"
 
+#include "tml/error.hpp"
 #include "tml/vec3.hpp" // tml::vec3
 
 #include <algorithm> // std::min, std::max
@@ -20,28 +21,28 @@ using tml::vertex;
 
 mesh::mesh(std::filesystem::path const& filepath)
 {
-    error_code result = error_code::none;
+    parse_error error;
 
     if (filepath.extension() == ".ply")
     {
-        result = load_from_ply(filepath);
+        error = load_from_ply(filepath).code;
     }
     else if (filepath.extension() == ".stl")
     {
-        result = load_from_stl(filepath);
+        error = load_from_stl(filepath).code;
     }
     else if (filepath.extension() == ".dae")
     {
-        result = load_from_collada(filepath);
+        error = load_from_collada(filepath).code;
     }
     else [[unlikely]]
     {
         throw std::runtime_error{fmt::format("Failed to load mesh: Unsupported file extension")};
     }
 
-    if (result != error_code::none) [[unlikely]]
+    if (error) [[unlikely]]
     {
-        throw std::runtime_error{fmt::format("Failed to load mesh: {}", format_error(result))};
+        throw std::runtime_error{fmt::format("Failed to load mesh: {}", error.message())};
     }
 }
 
@@ -122,18 +123,19 @@ auto mesh::noise(float coefficient) noexcept -> mesh&
     return *this;
 }
 
-auto mesh::save_to_ply(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code
+auto mesh::save_to_ply(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> write_error
 {
     if (!can_overwrite && std::filesystem::exists(filepath)) [[unlikely]]
     {
-        return error_code::file_already_exists;
+        return write_error{.code = error_code::file_already_exists};
     }
 
     std::ofstream file{filepath};
 
     if (!file) [[unlikely]]
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return std::filesystem::exists(filepath) ? write_error{.code = error_code::unknown_io_error}
+                                                 : write_error{.code = error_code::file_not_found};
     }
 
     file << fmt::format(
@@ -152,21 +154,22 @@ auto mesh::save_to_ply(std::filesystem::path const& filepath, bool can_overwrite
         file << fmt::format("3 {} {} {}\n", index_v1, index_v2, index_v3);
     }
 
-    return error_code::none;
+    return write_error{.code = error_code::none};
 }
 
-auto mesh::save_to_stl(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code
+auto mesh::save_to_stl(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> write_error
 {
     if (!can_overwrite && std::filesystem::exists(filepath)) [[unlikely]]
     {
-        return error_code::file_already_exists;
+        return write_error{.code = error_code::file_already_exists};
     }
 
     std::ofstream file{filepath};
 
     if (!file) [[unlikely]]
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return std::filesystem::exists(filepath) ? write_error{.code = error_code::unknown_io_error}
+                                                 : write_error{.code = error_code::file_not_found};
     }
 
     file << fmt::format("solid {}\n", filepath.stem().string());
@@ -188,21 +191,22 @@ auto mesh::save_to_stl(std::filesystem::path const& filepath, bool can_overwrite
 
     file << fmt::format("endsolid {}\n", filepath.stem().string());
 
-    return error_code::none;
+    return write_error{.code = error_code::none};
 }
 
-auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> error_code
+auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> write_error
 {
-    if (!can_overwrite && std::filesystem::exists(filepath))
+    if (!can_overwrite && std::filesystem::exists(filepath)) [[unlikely]]
     {
-        return error_code::file_already_exists;
+        return write_error{.code = error_code::file_already_exists};
     }
 
     std::ofstream file{filepath};
 
     if (!file)
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return std::filesystem::exists(filepath) ? write_error{.code = error_code::unknown_io_error}
+                                                 : write_error{.code = error_code::file_not_found};
     }
 
     file << fmt::format(
@@ -231,16 +235,17 @@ auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overw
     file.seekp(-1, std::ios_base::end);
     file << "</p>\n</triangles>\n</mesh>\n</geometry>\n</library_geometries>\n</COLLADA>";
 
-    return error_code::none;
+    return write_error{.code = error_code::none};
 }
 
-auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> error_code
+auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> parse_error
 {
     std::ifstream file{filepath};
 
     if (!file) [[unlikely]]
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return std::filesystem::exists(filepath) ? parse_error{.code = error_code::unknown_io_error}
+                                                 : parse_error{.code = error_code::file_not_found};
     }
 
     static constexpr std::ptrdiff_t vertex_count_offset{15L};
@@ -267,7 +272,7 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> erro
 
             if (ec != std::errc()) [[unlikely]]
             {
-                return error_code::invalid_data;
+                return parse_error{.code = error_code::invalid_data};
             }
         }
         else if (line.starts_with("element face"))
@@ -277,7 +282,7 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> erro
 
             if (ec != std::errc()) [[unlikely]]
             {
-                return error_code::invalid_data;
+                return parse_error{.code = error_code::invalid_data};
             }
         }
     }
@@ -310,16 +315,17 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> erro
         m_vertices[v3].add_neighbor(v2);
     }
 
-    return error_code::none;
+    return parse_error{.code = error_code::none};
 }
 
-auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> error_code
+auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> parse_error
 {
     std::ifstream file{filepath};
 
     if (!file) [[unlikely]]
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return std::filesystem::exists(filepath) ? parse_error{.code = error_code::unknown_io_error}
+                                                 : parse_error{.code = error_code::file_not_found};
     }
 
     std::string line;
@@ -337,7 +343,7 @@ auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> erro
 
             if (!(iss >> x >> y >> z)) [[unlikely]]
             {
-                return error_code::invalid_data;
+                return parse_error{.code = error_code::invalid_data};
             }
 
             vertex const v{x, y, z};
@@ -371,10 +377,10 @@ auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> erro
         }
     }
 
-    return error_code::none;
+    return parse_error{.code = error_code::none};
 }
 
-auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> error_code
+auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> parse_error
 {
     using pugi::xml_document;
     using pugi::xml_parse_result;
@@ -384,7 +390,7 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
 
     if (!result) [[unlikely]]
     {
-        return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
+        return parse_error{.code = error_code::invalid_data};
     }
 
     auto const library_geometries = document.child("COLLADA").child("library_geometries");
@@ -401,7 +407,7 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
 
                 if (vertex_data.size() % 3 != 0) [[unlikely]]
                 {
-                    return error_code::invalid_data;
+                    return parse_error{.code = error_code::invalid_data};
                 }
 
                 for (auto const idx : std::views::iota(0UL, vertex_data.size() / 3))
@@ -417,7 +423,7 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
 
                 if (face_data.size() % 3 != 0) [[unlikely]]
                 {
-                    return error_code::invalid_data;
+                    return parse_error{.code = error_code::invalid_data};
                 }
 
                 for (auto const idx : std::views::iota(0UL, face_data.size() / 3))
@@ -438,5 +444,5 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
         }
     }
 
-    return error_code::none;
+    return parse_error{.code = error_code::none};
 }
