@@ -23,15 +23,7 @@ install(
 install(
     TARGETS libtml
     EXPORT tmlTargets
-    RUNTIME #
-    COMPONENT tml_Runtime
-    LIBRARY #
-    COMPONENT tml_Runtime
-    NAMELINK_COMPONENT tml_Development
-    ARCHIVE #
-    COMPONENT tml_Development
-    INCLUDES #
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 write_basic_package_version_file(
@@ -41,7 +33,7 @@ write_basic_package_version_file(
 
 # Allow package maintainers to freely override the path for the configs
 set(
-    tml_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${package}"
+    tml_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/${package}"
     CACHE STRING "CMake package config location relative to the install prefix"
 )
 set_property(CACHE tml_INSTALL_CMAKEDIR PROPERTY TYPE PATH)
