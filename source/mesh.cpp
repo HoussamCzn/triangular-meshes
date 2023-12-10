@@ -215,6 +215,7 @@ auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overw
         file << fmt::format("{} {} {} ", vertex.x(), vertex.y(), vertex.z());
     }
 
+    file.seekp(-1, std::ios_base::end);
     file << "</float_array>\n<technique_common>\n<accessor count=\"" << m_vertices.size()
          << "\" offset=\"0\" source=\"#mesh-coords-array\" stride=\"3\">\n<param name=\"X\" type=\"float\"/>\n<param name=\"Y\" "
             "type=\"float\"/>\n<param name=\"Z\" type=\"float\"/>\n</accessor>\n</technique_common>\n</source>\n<vertices "
@@ -227,6 +228,7 @@ auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overw
         file << fmt::format("{} {} {} ", index_v1, index_v2, index_v3);
     }
 
+    file.seekp(-1, std::ios_base::end);
     file << "</p>\n</triangles>\n</mesh>\n</geometry>\n</library_geometries>\n</COLLADA>";
 
     return error_code::none;
@@ -314,66 +316,58 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> erro
 auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> error_code
 {
     std::ifstream file{filepath};
-    if (!file)
+
+    if (!file) [[unlikely]]
     {
         return std::filesystem::exists(filepath) ? error_code::unknown_io_error : error_code::file_not_found;
     }
 
     std::string line;
     std::unordered_map<vertex, std::size_t> vertex_indices;
+    std::vector<std::size_t> face_vertex_indices;
 
     while (std::getline(file, line))
     {
         if (line.starts_with("vertex"))
         {
-            char const* start = line.data();
-            char const* end = line.data();
+            std::istringstream iss(line.substr(7));
             float x{0.0F};
             float y{0.0F};
             float z{0.0F};
 
-            std::advance(start, 7);
-            std::advance(end, line.size());
-
-            auto [ptr, ec] = std::from_chars(start, end, x);
-            if (ec != std::errc()) [[unlikely]]
-            {
-                return error_code::invalid_data;
-            }
-            std::advance(ptr, 1);
-
-            auto [ptr2, ec2] = std::from_chars(ptr, end, y);
-            if (ec2 != std::errc()) [[unlikely]]
-            {
-                return error_code::invalid_data;
-            }
-            std::advance(ptr2, 1);
-
-            auto [_, ec3] = std::from_chars(ptr2, end, z);
-            if (ec3 != std::errc()) [[unlikely]]
+            if (!(iss >> x >> y >> z)) [[unlikely]]
             {
                 return error_code::invalid_data;
             }
 
-            auto const [it, inserted] = vertex_indices.try_emplace(vertex{x, y, z}, m_vertices.size());
+            vertex const v{x, y, z};
+            auto const [it, inserted] = vertex_indices.try_emplace(v, m_vertices.size());
+
             if (inserted)
             {
-                m_vertices.emplace_back(x, y, z);
+                m_vertices.push_back(v);
             }
-        }
-        else if (line.starts_with("endloop"))
-        {
-            std::size_t const v1 = vertex_indices[m_vertices[m_vertices.size() - 3]];
-            std::size_t const v2 = vertex_indices[m_vertices[m_vertices.size() - 2]];
-            std::size_t const v3 = vertex_indices[m_vertices[m_vertices.size() - 1]];
-            m_faces.emplace_back(v1, v2, v3);
 
-            m_vertices[v1].add_neighbor(v2);
-            m_vertices[v1].add_neighbor(v3);
-            m_vertices[v2].add_neighbor(v1);
-            m_vertices[v2].add_neighbor(v3);
-            m_vertices[v3].add_neighbor(v1);
-            m_vertices[v3].add_neighbor(v2);
+            face_vertex_indices.push_back(it->second);
+        }
+        else if (line.starts_with("endfacet"))
+        {
+            if (face_vertex_indices.size() == 3)
+            {
+                std::size_t const v1 = face_vertex_indices[0];
+                std::size_t const v2 = face_vertex_indices[1];
+                std::size_t const v3 = face_vertex_indices[2];
+                m_faces.emplace_back(v1, v2, v3);
+
+                m_vertices[v1].add_neighbor(v2);
+                m_vertices[v1].add_neighbor(v3);
+                m_vertices[v2].add_neighbor(v1);
+                m_vertices[v2].add_neighbor(v3);
+                m_vertices[v3].add_neighbor(v1);
+                m_vertices[v3].add_neighbor(v2);
+
+                face_vertex_indices.clear();
+            }
         }
     }
 
