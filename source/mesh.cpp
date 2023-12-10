@@ -367,6 +367,13 @@ auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> erro
             std::size_t const v2 = vertex_indices[m_vertices[m_vertices.size() - 2]];
             std::size_t const v3 = vertex_indices[m_vertices[m_vertices.size() - 1]];
             m_faces.emplace_back(v1, v2, v3);
+
+            m_vertices[v1].add_neighbor(v2);
+            m_vertices[v1].add_neighbor(v3);
+            m_vertices[v2].add_neighbor(v1);
+            m_vertices[v2].add_neighbor(v3);
+            m_vertices[v3].add_neighbor(v1);
+            m_vertices[v3].add_neighbor(v2);
         }
     }
 
@@ -421,7 +428,17 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
 
                 for (auto const idx : std::views::iota(0UL, face_data.size() / 3))
                 {
-                    m_faces.emplace_back(face_data[idx * 3], face_data[idx * 3 + 1], face_data[idx * 3 + 2]);
+                    std::size_t const v1 = face_data[idx * 3];
+                    std::size_t const v2 = face_data[idx * 3 + 1];
+                    std::size_t const v3 = face_data[idx * 3 + 2];
+                    m_faces.emplace_back(v1, v2, v3);
+
+                    m_vertices[v1].add_neighbor(v2);
+                    m_vertices[v1].add_neighbor(v3);
+                    m_vertices[v2].add_neighbor(v1);
+                    m_vertices[v2].add_neighbor(v3);
+                    m_vertices[v3].add_neighbor(v1);
+                    m_vertices[v3].add_neighbor(v2);
                 }
             }
         }
