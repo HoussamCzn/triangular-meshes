@@ -16,9 +16,9 @@ namespace tml
         invalid_data,
     };
 
-    [[nodiscard]] constexpr auto operator==(error_code const lhs, error_code const rhs) noexcept -> bool
+    [[nodiscard]] constexpr auto operator!(error_code const error) noexcept -> bool
     {
-        return static_cast<std::size_t>(lhs) == static_cast<std::size_t>(rhs);
+        return error == error_code::none;
     }
 
     static constexpr std::array errors{
