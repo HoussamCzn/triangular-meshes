@@ -1,6 +1,5 @@
 #include "tml/mesh.hpp"
 
-#include "tml/error.hpp"
 #include "tml/vec3.hpp" // tml::vec3
 
 #include <algorithm> // std::min, std::max
@@ -12,6 +11,7 @@
 #include <ranges> // std::views::iota
 #include <sstream> // std::istringstream
 #include <stdexcept> // std::runtime_error
+#include <tuple> // std::tuple
 #include <unordered_map> // std::unordered_map
 #include <vector> // std::vector
 
@@ -53,9 +53,7 @@ auto mesh::faces() const noexcept -> std::span<face const> { return m_faces; }
 auto mesh::area() const noexcept -> float
 {
     float area{0.0F};
-
-    for (auto const& face : m_faces)
-    {
+    std::ranges::for_each(m_faces, [this, &area](face const& face) -> void {
         auto const [index_v1, index_v2, index_v3] = face.indices();
         vec3 const v1{m_vertices[index_v1].x(), m_vertices[index_v1].y(), m_vertices[index_v1].z()};
         vec3 const v2{m_vertices[index_v2].x(), m_vertices[index_v2].y(), m_vertices[index_v2].z()};
@@ -64,48 +62,34 @@ auto mesh::area() const noexcept -> float
         vec3 const edge2{v3.x() - v1.x(), v3.y() - v1.y(), v3.z() - v1.z()};
 
         area += 0.5F * edge1.cross(edge2).norm();
-    }
+    });
 
     return area;
 }
 
 auto mesh::center() noexcept -> mesh&
 {
-    vec3 min{m_vertices.front().x(), m_vertices.front().y(), m_vertices.front().z()};
-    vec3 max{min};
+    auto const [min, max] = std::ranges::minmax(
+        m_vertices | std::views::transform([](vertex const& v) { return std::make_tuple(v.x(), v.y(), v.z()); }));
 
-    for (auto const& vertex : m_vertices)
-    {
-        min = vec3{std::min(min.x(), vertex.x()), std::min(min.y(), vertex.y()), std::min(min.z(), vertex.z())};
-        max = vec3{std::max(max.x(), vertex.x()), std::max(max.y(), vertex.y()), std::max(max.z(), vertex.z())};
-    }
+    vec3 const center{(std::get<0>(max) + std::get<0>(min)) * 0.5F, (std::get<1>(max) + std::get<1>(min)) * 0.5F,
+                      (std::get<2>(max) + std::get<2>(min)) * 0.5F};
 
-    vec3 const center{(max + min) * 0.5F};
-
-    for (auto& vertex : m_vertices)
-    {
-        vertex.translate(-center);
-    }
+    std::ranges::for_each(m_vertices, [&](vertex& v) -> void { v.translate(-center); });
 
     return *this;
 }
 
 auto mesh::invert() noexcept -> mesh&
 {
-    for (auto& face : m_faces)
-    {
-        face.invert();
-    }
+    std::ranges::for_each(m_faces, [](auto& face) -> void { face.invert(); });
 
     return *this;
 }
 
 auto mesh::scale(float factor) noexcept -> mesh&
 {
-    for (auto& vertex : m_vertices)
-    {
-        vertex.scale(factor);
-    }
+    std::ranges::for_each(m_vertices, [&](vertex& vertex) -> void { vertex.scale(factor); });
 
     return *this;
 }
@@ -114,11 +98,9 @@ auto mesh::noise(float coefficient) noexcept -> mesh&
 {
     std::mt19937 generator{std::random_device{}()};
     std::uniform_real_distribution<float> distribution{-coefficient, coefficient};
-
-    for (auto& vertex : m_vertices)
-    {
+    std::ranges::for_each(m_vertices, [&](vertex& vertex) -> void {
         vertex.translate(vec3{distribution(generator), distribution(generator), distribution(generator)});
-    }
+    });
 
     return *this;
 }
@@ -143,16 +125,14 @@ auto mesh::save_to_ply(std::filesystem::path const& filepath, bool can_overwrite
         "{}\nproperty list uchar int vertex_indices\nend_header\n",
         m_vertices.size(), m_faces.size());
 
-    for (auto const& vertex : m_vertices)
-    {
+    std::ranges::for_each(m_vertices, [&file](vertex const& vertex) -> void {
         file << fmt::format("{} {} {}\n", vertex.x(), vertex.y(), vertex.z());
-    }
+    });
 
-    for (auto const& face : m_faces)
-    {
+    std::ranges::for_each(m_faces, [&file](face const& face) -> void {
         auto const [index_v1, index_v2, index_v3] = face.indices();
         file << fmt::format("3 {} {} {}\n", index_v1, index_v2, index_v3);
-    }
+    });
 
     return write_error{.code = error_code::none};
 }
@@ -173,9 +153,7 @@ auto mesh::save_to_stl(std::filesystem::path const& filepath, bool can_overwrite
     }
 
     file << fmt::format("solid {}\n", filepath.stem().string());
-
-    for (auto const& face : m_faces)
-    {
+    std::ranges::for_each(m_faces, [this, &file](face const& face) -> void {
         auto const [index_v1, index_v2, index_v3] = face.indices();
         vec3 const v1{m_vertices[index_v1].x(), m_vertices[index_v1].y(), m_vertices[index_v1].z()};
         vec3 const v2{m_vertices[index_v2].x(), m_vertices[index_v2].y(), m_vertices[index_v2].z()};
@@ -187,7 +165,7 @@ auto mesh::save_to_stl(std::filesystem::path const& filepath, bool can_overwrite
         file << fmt::format(
             "facet normal {} {} {}\nouter loop\nvertex {} {} {}\nvertex {} {} {}\nvertex {} {} {}\nendloop\nendfacet\n",
             normal.x(), normal.y(), normal.z(), v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z(), v3.x(), v3.y(), v3.z());
-    }
+    });
 
     file << fmt::format("endsolid {}\n", filepath.stem().string());
 
@@ -214,23 +192,22 @@ auto mesh::save_to_collada(std::filesystem::path const& filepath, bool can_overw
         "id=\"mesh\">\n<mesh>\n<source id=\"mesh-coords\">\n<float_array id=\"mesh-coords-array\" count=\"{}\">",
         m_vertices.size() * 3);
 
-    for (auto const& vertex : m_vertices)
-    {
+    std::ranges::for_each(m_vertices, [&file](vertex const& vertex) -> void {
         file << fmt::format("{} {} {} ", vertex.x(), vertex.y(), vertex.z());
-    }
+    });
 
     file.seekp(-1, std::ios_base::end);
+
     file << "</float_array>\n<technique_common>\n<accessor count=\"" << m_vertices.size()
          << "\" offset=\"0\" source=\"#mesh-coords-array\" stride=\"3\">\n<param name=\"X\" type=\"float\"/>\n<param name=\"Y\" "
             "type=\"float\"/>\n<param name=\"Z\" type=\"float\"/>\n</accessor>\n</technique_common>\n</source>\n<vertices "
             "id=\"mesh-vertices\">\n<input semantic=\"POSITION\" source=\"#mesh-coords\"/>\n</vertices>\n<triangles count=\""
          << m_faces.size() << "\">\n<input offset=\"0\" semantic=\"VERTEX\" source=\"#mesh-vertices\"/>\n<p>";
 
-    for (auto const& face : m_faces)
-    {
+    std::ranges::for_each(m_faces, [&file](face const& face) -> void {
         auto const [index_v1, index_v2, index_v3] = face.indices();
         file << fmt::format("{} {} {} ", index_v1, index_v2, index_v3);
-    }
+    });
 
     file.seekp(-1, std::ios_base::end);
     file << "</p>\n</triangles>\n</mesh>\n</geometry>\n</library_geometries>\n</COLLADA>";
@@ -263,11 +240,11 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> pars
 
         auto const* start = line.data();
         auto const* end = line.data();
-        std::advance(end, line.size());
+        std::ranges::advance(end, static_cast<std::ptrdiff_t>(line.size()));
 
         if (line.starts_with("element vertex"))
         {
-            std::advance(start, vertex_count_offset);
+            std::ranges::advance(start, vertex_count_offset);
             auto const [ptr, ec] = std::from_chars(start, end, vertex_count);
 
             if (ec != std::errc()) [[unlikely]]
@@ -277,7 +254,7 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> pars
         }
         else if (line.starts_with("element face"))
         {
-            std::advance(start, face_count_offset);
+            std::ranges::advance(start, face_count_offset);
             auto const [ptr, ec] = std::from_chars(start, end, face_count);
 
             if (ec != std::errc()) [[unlikely]]
@@ -290,17 +267,15 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> pars
     m_vertices.reserve(vertex_count);
     m_faces.reserve(face_count);
 
-    for (std::size_t i{0UL}; i < vertex_count; ++i)
-    {
+    std::ranges::for_each(std::views::iota(0UL, vertex_count), [this, &file]([[maybe_unused]] std::size_t const idx) -> void {
         float x{0.0F};
         float y{0.0F};
         float z{0.0F};
         file >> x >> y >> z;
         m_vertices.emplace_back(x, y, z);
-    }
+    });
 
-    for (std::size_t i{0UL}; i < face_count; ++i)
-    {
+    std::ranges::for_each(std::views::iota(0UL, face_count), [&]([[maybe_unused]] std::size_t const idx) -> void {
         std::size_t v1{0UL};
         std::size_t v2{0UL};
         std::size_t v3{0UL};
@@ -313,7 +288,7 @@ auto mesh::load_from_ply(std::filesystem::path const& filepath) noexcept -> pars
         m_vertices[v2].add_neighbor(v3);
         m_vertices[v3].add_neighbor(v1);
         m_vertices[v3].add_neighbor(v2);
-    }
+    });
 
     return parse_error{.code = error_code::none};
 }
@@ -336,12 +311,36 @@ auto mesh::load_from_stl(std::filesystem::path const& filepath) noexcept -> pars
     {
         if (line.starts_with("vertex"))
         {
-            std::istringstream iss(line.substr(7));
+            auto const* start = line.data();
+            auto const* end = line.data();
             float x{0.0F};
             float y{0.0F};
             float z{0.0F};
 
-            if (!(iss >> x >> y >> z)) [[unlikely]]
+            std::ranges::advance(start, 7L);
+            std::ranges::advance(end, static_cast<std::ptrdiff_t>(line.size()));
+            auto [ptr, ec] = std::from_chars(start, end, x);
+
+            if (ec != std::errc()) [[unlikely]]
+            {
+                return parse_error{.code = error_code::invalid_data};
+            }
+
+            std::ranges::advance(ptr, 1L);
+            start = ptr;
+            auto [ptr2, ec2] = std::from_chars(start, end, y);
+
+            if (ec2 != std::errc()) [[unlikely]]
+            {
+                return parse_error{.code = error_code::invalid_data};
+            }
+
+            std::ranges::advance(ptr2, 1L);
+            start = ptr2;
+
+            auto [_, ec3] = std::from_chars(start, end, z);
+
+            if (ec3 != std::errc()) [[unlikely]]
             {
                 return parse_error{.code = error_code::invalid_data};
             }
@@ -402,7 +401,7 @@ auto mesh::load_from_collada(std::filesystem::path const& filepath) noexcept -> 
             for (auto const& source : mesh.children("source"))
             {
                 auto const* float_array = source.child("float_array").child_value();
-                std::istringstream iss(float_array);
+                std::istringstream iss{float_array};
                 std::vector<float> vertex_data(std::istream_iterator<float>{iss}, {});
 
                 if (vertex_data.size() % 3 != 0) [[unlikely]]
