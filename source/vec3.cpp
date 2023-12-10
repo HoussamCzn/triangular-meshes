@@ -27,6 +27,13 @@ auto vec3::cross(vec3 const& other) const noexcept -> vec3
     };
 }
 
+auto vec3::operator==(vec3 const& other) const noexcept -> bool
+{
+    return m_x == other.m_x && m_y == other.m_y && m_z == other.m_z;
+}
+
+auto vec3::operator!=(vec3 const& other) const noexcept -> bool { return !(*this == other); }
+
 auto tml::operator+(vec3 const& lhs, vec3 const& rhs) noexcept -> vec3
 {
     return {lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z()};

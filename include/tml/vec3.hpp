@@ -20,6 +20,10 @@ namespace tml
 
         auto cross(vec3 const& other) const noexcept -> vec3;
 
+        auto operator==(vec3 const& other) const noexcept -> bool;
+
+        auto operator!=(vec3 const& other) const noexcept -> bool;
+
         friend auto operator+(vec3 const& lhs, vec3 const& rhs) noexcept -> vec3;
 
         friend auto operator-(vec3 const& lhs, vec3 const& rhs) noexcept -> vec3;
