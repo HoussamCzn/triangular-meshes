@@ -57,9 +57,27 @@ target_include_directories(
 
 target_compile_features(libtml PUBLIC cxx_std_20)
 
-find_package(fmt REQUIRED)
+# ---- Dependencies ----
+
+include(FetchContent)
+
+find_package(fmt QUIET)
+if(NOT fmt_FOUND)
+  FetchContent_Declare(
+      fmt
+      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  )
+  FetchContent_MakeAvailable(fmt)
+endif()
 target_link_libraries(libtml PRIVATE fmt::fmt)
-find_package(pugixml REQUIRED)
+find_package(pugixml QUIET)
+if(NOT pugixml_FOUND)
+  FetchContent_Declare(
+      pugixml
+      GIT_REPOSITORY https://github.com/zeux/pugixml.git
+  )
+  FetchContent_MakeAvailable(pugixml)
+endif()
 target_link_libraries(libtml PRIVATE pugixml::static pugixml::pugixml)
 
 # ---- Install rules ----
