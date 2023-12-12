@@ -2,24 +2,23 @@
 
 ## Dépendances
 
-Pour voir la liste des dépendances, veuillez vous référer à [vcpkg.json](vcpkg.json).
+* Un compilateur C++20
+* CMake 3.14 ou plus récent
 
-## Build
-
-This project doesn't require any special command-line flags to build to keep
-things simple.
+## Build avec CMake
 
 Ce projet ne nécessite aucun flag spécial pour garder les choses simples.
-Ici sont les étapes pour construire en mode release avec un générateur, comme
-Unix Makefiles:
+
+**Ici sont les étapes pour construire en mode Release avec un générateur, comme
+Unix Makefiles:**
 
 ```sh
 cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-Ici sont les étapes pour construire en mode release avec un générateur, comme
-Visual Studio:
+**Ici sont les étapes pour construire en mode Release avec un générateur, comme
+Visual Studio:**
 
 ```sh
 cmake -S . -B build
@@ -62,8 +61,8 @@ cmake --install build --config Release
 
 ### Package CMake
 
-Ce projet exporte un package CMake pour être utilisé avec la commande
-[`find_package`][3] de CMake:
+**Ce projet exporte un package CMake pour être utilisé avec la commande
+[`FetchContent`][3]:**
 
 * Nom du package: `tml`
 * Nom de la cible: `tml::tml`
@@ -79,11 +78,11 @@ FetchContent_Declare(
   GIT_TAG main
   GIT_SHALLOW TRUE
 )
-FetchContent_MakeAvailable(glaze)
+FetchContent_MakeAvailable(tml)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE tml::tml)
 ```
 
 [1]: https://cmake.org/download/
 [2]: https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project
-[3]: https://cmake.org/cmake/help/latest/command/find_package.html
+[3]: https://cmake.org/cmake/help/latest/module/FetchContent.html
