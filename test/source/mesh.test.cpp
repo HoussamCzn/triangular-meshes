@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <fstream>
@@ -9,7 +10,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a PLY file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write<tml::format::ply>("output.ply", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.ply", true).code == tml::error_code::none);
 
         std::ifstream const file{"output.ply"};
         REQUIRE(file.good());
@@ -20,7 +21,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a STL file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write<tml::format::stl>("output.stl", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.stl", true).code == tml::error_code::none);
 
         std::ifstream const file{"output.stl"};
         REQUIRE(file.good());
@@ -31,7 +32,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a Collada file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write<tml::format::collada>("output.dae", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.dae", true).code == tml::error_code::none);
 
         std::ifstream const file{"output.dae"};
         REQUIRE(file.good());
@@ -43,10 +44,10 @@ TEST_CASE("Meshes tests", "[library]")
     {
         tml::mesh const mesh{"input.ply"};
 
-        WHEN("Overwriting is allowed") { REQUIRE(mesh.write<tml::format::ply>("output.ply", true).code == tml::error_code::none); }
+        WHEN("Overwriting is allowed") { REQUIRE(mesh.write("output.ply", true).code == tml::error_code::none); }
         WHEN("Overwriting is not allowed")
         {
-            REQUIRE(mesh.write<tml::format::ply>("output.ply", false).code == tml::error_code::file_already_exists);
+            REQUIRE(mesh.write("output.ply", false).code == tml::error_code::file_already_exists);
         }
     }
 
@@ -74,7 +75,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Check the adjacent vertices of a vertex in a .ply file")
     {
         tml::mesh const mesh{"output.ply"};
-        auto const vertices = mesh.vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(std::accumulate(vertices.begin(), vertices.end(), 0UL,
                                 [](std::size_t const sum, tml::vertex const& vertex) -> std::size_t {
                                     return sum + vertex.neighbors().size();
@@ -84,7 +85,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Check the adjacent vertices of a vertex in a .stl file")
     {
         tml::mesh const mesh{"output.stl"};
-        auto const vertices = mesh.vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(std::accumulate(vertices.begin(), vertices.end(), 0UL,
                                 [](std::size_t const sum, tml::vertex const& vertex) -> std::size_t {
                                     return sum + vertex.neighbors().size();
@@ -94,7 +95,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Check the adjacent vertices of a vertex in a .dae file")
     {
         tml::mesh const mesh{"output.dae"};
-        auto const vertices = mesh.vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(std::accumulate(vertices.begin(), vertices.end(), 0UL,
                                 [](std::size_t const sum, tml::vertex const& vertex) -> std::size_t {
                                     return sum + vertex.neighbors().size();
@@ -107,11 +108,17 @@ TEST_CASE("Meshes tests", "[library]")
         REQUIRE(mesh.area() == 24.0F);
     }
 
+    SECTION("Check if a mesh is closed")
+    {
+        tml::mesh const mesh{"input.ply"};
+        REQUIRE(mesh.is_closed());
+    }
+
     SECTION("Successfully center a mesh")
     {
         tml::mesh mesh{"uncentered_input.ply"};
         mesh.center();
-        auto const vertices = mesh.vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(vertices[0].x() == -1.0F);
         REQUIRE(vertices[0].y() == -1.0F);
         REQUIRE(vertices[0].z() == -1.0F);
@@ -142,7 +149,7 @@ TEST_CASE("Meshes tests", "[library]")
     {
         tml::mesh mesh{"input.ply"};
         mesh.scale(2.0F);
-        auto const vertices = mesh.vertices();
+        auto const& vertices = mesh.vertices();
         REQUIRE(vertices[0].x() == -2.0F);
         REQUIRE(vertices[0].y() == -2.0F);
         REQUIRE(vertices[0].z() == -2.0F);
@@ -173,7 +180,7 @@ TEST_CASE("Meshes tests", "[library]")
     {
         tml::mesh mesh{"input.ply"};
         mesh.invert();
-        auto const faces = mesh.faces();
+        auto const& faces = mesh.faces();
         REQUIRE(faces[0].indices() == std::array<std::size_t, 3UL>{0UL, 1UL, 3UL});
         REQUIRE(faces[1].indices() == std::array<std::size_t, 3UL>{0UL, 3UL, 2UL});
         REQUIRE(faces[2].indices() == std::array<std::size_t, 3UL>{1UL, 7UL, 3UL});
@@ -186,5 +193,15 @@ TEST_CASE("Meshes tests", "[library]")
         REQUIRE(faces[9].indices() == std::array<std::size_t, 3UL>{6UL, 2UL, 3UL});
         REQUIRE(faces[10].indices() == std::array<std::size_t, 3UL>{0UL, 5UL, 1UL});
         REQUIRE(faces[11].indices() == std::array<std::size_t, 3UL>{5UL, 0UL, 4UL});
+    }
+
+    SECTION("Successfully subdivide a mesh")
+    {
+        tml::mesh mesh{"input.ply"};
+        auto const& vertices = mesh.vertices();
+        auto const& faces = mesh.faces();
+        mesh.subdivide();
+        REQUIRE(vertices.size() == 20UL);
+        REQUIRE(faces.size() == 48UL);
     }
 }
