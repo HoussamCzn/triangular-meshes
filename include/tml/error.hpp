@@ -37,6 +37,8 @@ namespace tml
     {
         error_code code{};
 
+        [[nodiscard]] constexpr auto message() const noexcept -> std::string_view { return format_error(code); }
+
         constexpr explicit operator bool() const noexcept { return code != error_code::none; }
 
         constexpr auto operator!() const noexcept -> bool { return !this->operator bool(); }
@@ -45,18 +47,16 @@ namespace tml
 
         constexpr auto operator!=(parse_error const& other) const noexcept -> bool { return !(*this == other); }
 
-        constexpr auto operator=(error_code const error) noexcept -> parse_error&
-        {
-            code = error;
-            return *this;
-        }
+        constexpr auto operator==(error_code const error) const noexcept -> bool { return code == error; }
 
-        [[nodiscard]] constexpr auto message() const noexcept -> std::string_view { return format_error(code); }
+        constexpr auto operator!=(error_code const error) const noexcept -> bool { return !(*this == error); }
     };
 
     struct write_error
     {
         error_code code{};
+
+        [[nodiscard]] constexpr auto message() const noexcept -> std::string_view { return format_error(code); }
 
         constexpr explicit operator bool() const noexcept { return code != error_code::none; }
 
@@ -66,12 +66,8 @@ namespace tml
 
         constexpr auto operator!=(write_error const& other) const noexcept -> bool { return !(*this == other); }
 
-        constexpr auto operator=(error_code const error) noexcept -> write_error&
-        {
-            code = error;
-            return *this;
-        }
+        constexpr auto operator==(error_code const error) const noexcept -> bool { return code == error; }
 
-        [[nodiscard]] constexpr auto message() const noexcept -> std::string_view { return format_error(code); }
+        constexpr auto operator!=(error_code const error) const noexcept -> bool { return !(*this == error); }
     };
 } // namespace tml
