@@ -53,6 +53,11 @@ auto tml::operator*(vec3 const& lhs, float scalar) noexcept -> vec3
 
 auto tml::operator*(float scalar, vec3 const& rhs) noexcept -> vec3 { return rhs * scalar; }
 
+auto tml::operator/(vec3 const& lhs, float scalar) noexcept -> vec3
+{
+    return {lhs.x() / scalar, lhs.y() / scalar, lhs.z() / scalar};
+}
+
 auto tml::operator+=(vec3& lhs, vec3 const& rhs) noexcept -> vec3&
 {
     lhs.m_x += rhs.m_x;

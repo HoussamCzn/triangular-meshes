@@ -34,6 +34,8 @@ namespace tml
 
         friend auto operator*(float scalar, vec3 const& rhs) noexcept -> vec3;
 
+        friend auto operator/(vec3 const& lhs, float scalar) noexcept -> vec3;
+
         friend auto operator+=(vec3& lhs, vec3 const& rhs) noexcept -> vec3&;
 
         friend auto operator-=(vec3& lhs, vec3 const& rhs) noexcept -> vec3&;
