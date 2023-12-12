@@ -25,15 +25,15 @@ mesh::mesh(std::filesystem::path const& filepath)
 
     if (filepath.extension() == ".ply")
     {
-        error = load_from_ply(filepath).code;
+        error = load_from_ply(filepath);
     }
     else if (filepath.extension() == ".stl")
     {
-        error = load_from_stl(filepath).code;
+        error = load_from_stl(filepath);
     }
     else if (filepath.extension() == ".dae")
     {
-        error = load_from_collada(filepath).code;
+        error = load_from_collada(filepath);
     }
 
     if (error) [[unlikely]]

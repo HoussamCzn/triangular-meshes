@@ -10,7 +10,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a PLY file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write("output.ply", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.ply", true) == tml::error_code::none);
 
         std::ifstream const file{"output.ply"};
         REQUIRE(file.good());
@@ -21,7 +21,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a STL file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write("output.stl", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.stl", true) == tml::error_code::none);
 
         std::ifstream const file{"output.stl"};
         REQUIRE(file.good());
@@ -32,7 +32,7 @@ TEST_CASE("Meshes tests", "[library]")
     SECTION("Successfully save a mesh to a Collada file")
     {
         tml::mesh const mesh{"input.ply"};
-        REQUIRE(mesh.write("output.dae", true).code == tml::error_code::none);
+        REQUIRE(mesh.write("output.dae", true) == tml::error_code::none);
 
         std::ifstream const file{"output.dae"};
         REQUIRE(file.good());
@@ -44,10 +44,10 @@ TEST_CASE("Meshes tests", "[library]")
     {
         tml::mesh const mesh{"input.ply"};
 
-        WHEN("Overwriting is allowed") { REQUIRE(mesh.write("output.ply", true).code == tml::error_code::none); }
+        WHEN("Overwriting is allowed") { REQUIRE(mesh.write("output.ply", true) == tml::error_code::none); }
         WHEN("Overwriting is not allowed")
         {
-            REQUIRE(mesh.write("output.ply", false).code == tml::error_code::file_already_exists);
+            REQUIRE(mesh.write("output.ply", false) == tml::error_code::file_already_exists);
         }
     }
 
