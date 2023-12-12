@@ -12,7 +12,7 @@ Ce projet propose une bibliothèque C++ pour manipuler des maillages triangulair
     - [Homothétie du maillage](#homothétie-du-maillage)
     - [Bruiter le maillage](#bruiter-le-maillage)
     - [Vérifier les arêtes](#vérifier-les-arêtes)
-  - [Subdivision de Loop](#subdivision-de-loop)
+    - [Subdivision de Loop](#subdivision-de-loop)
   - [Exemple concret](#exemple-concret)
   - [Licence](#licence)
 
@@ -170,7 +170,7 @@ if (mesh.is_closed())
 }
 ```
 
-## Subdivision de Loop
+### Subdivision de Loop
 
 On peut subdiviser un maillage en utilisant la fonction ``subdivide``.
 
