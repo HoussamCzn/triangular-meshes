@@ -68,8 +68,11 @@ if (err) [[unlikely]]
 {
     std::cerr << err.message() << '\n';
 }
+```
+
 Il est également possible de gérer les erreurs en les comparant à l'énumération tml::error_code:
 
+```cpp
 switch (ec.code) // .code ici pour récupérer l'erreur sous forme d'un entier
 {
     case tml::error_code::none:
