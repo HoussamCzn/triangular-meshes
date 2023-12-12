@@ -4,7 +4,7 @@ include(cmake/prelude.cmake)
 
 project(
     tml
-    VERSION 1.2.0
+    VERSION 1.3.0
     LANGUAGES CXX
 )
 
