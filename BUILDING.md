@@ -12,6 +12,9 @@
   - [Installation](#installation)
     - [Package CMake](#package-cmake)
 
+Pour ceux qui souhaiteraient juste utiliser la bibliothèque dans leur code, il
+est recommandé d'utiliser le [package CMake](#package-cmake) fourni par ce
+projet. C'est la méthode la plus simple et la plus portable.
 
 ## Dépendances
 
