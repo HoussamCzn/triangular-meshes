@@ -13,7 +13,7 @@ auto vertex::y() const noexcept -> float { return m_y; }
 
 auto vertex::z() const noexcept -> float { return m_z; }
 
-auto vertex::neighbors() const noexcept -> std::span<std::size_t const> { return m_neighbors; }
+auto vertex::neighbors() const noexcept -> std::vector<std::size_t> const& { return m_neighbors; }
 
 auto vertex::translate(vec3 const& offset) noexcept -> vertex&
 {

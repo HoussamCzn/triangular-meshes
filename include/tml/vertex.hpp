@@ -2,7 +2,6 @@
 
 #include "tml/config.hpp" // TML_EXPORT
 
-#include <span> // std::span
 #include <vector> // std::vector
 
 namespace tml
@@ -21,7 +20,7 @@ namespace tml
 
         [[nodiscard]] auto z() const noexcept -> float;
 
-        [[nodiscard]] auto neighbors() const noexcept -> std::span<std::size_t const>;
+        [[nodiscard]] auto neighbors() const noexcept -> std::vector<std::size_t> const&;
 
         auto translate(vec3 const& offset) noexcept -> vertex&;
 

@@ -6,18 +6,10 @@
 #include "tml/vertex.hpp" // tml::vertex
 
 #include <filesystem> // std::filesystem::path, std::filesystem::exists
-#include <span> // std::span
 #include <vector> // std::vector
 
 namespace tml
 {
-    enum class format
-    {
-        ply,
-        stl,
-        collada
-    };
-
     class TML_EXPORT mesh
     {
     public:
@@ -26,11 +18,13 @@ namespace tml
 
         explicit mesh(std::filesystem::path const& filepath);
 
-        [[nodiscard]] auto vertices() const noexcept -> std::span<vertex const>;
+        [[nodiscard]] auto vertices() const noexcept -> std::vector<vertex> const&;
 
-        [[nodiscard]] auto faces() const noexcept -> std::span<face const>;
+        [[nodiscard]] auto faces() const noexcept -> std::vector<face> const&;
 
         [[nodiscard]] auto area() const noexcept -> float;
+
+        [[nodiscard]] auto is_closed() const noexcept -> bool;
 
         auto center() noexcept -> mesh&;
 
@@ -40,49 +34,11 @@ namespace tml
 
         auto noise(float coefficient) noexcept -> mesh&;
 
-        template <format Format>
-        auto read(std::filesystem::path const& filepath) noexcept -> parse_error
-        {
-            if (filepath.empty()) [[unlikely]]
-            {
-                return parse_error{.code = error_code::invalid_filepath};
-            }
+        auto subdivide() noexcept -> mesh&;
 
-            if constexpr (Format == format::ply)
-            {
-                return load_from_ply(filepath);
-            }
-            else if constexpr (Format == format::stl)
-            {
-                return load_from_stl(filepath);
-            }
-            else if constexpr (Format == format::collada)
-            {
-                return load_from_collada(filepath);
-            }
-        }
+        auto read(std::filesystem::path const& filepath) noexcept -> parse_error;
 
-        template <format Format>
-        auto write(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> write_error
-        {
-            if (filepath.empty()) [[unlikely]]
-            {
-                return write_error{.code = error_code::invalid_filepath};
-            }
-
-            if constexpr (Format == format::ply)
-            {
-                return save_to_ply(filepath, can_overwrite);
-            }
-            else if constexpr (Format == format::stl)
-            {
-                return save_to_stl(filepath, can_overwrite);
-            }
-            else if constexpr (Format == format::collada)
-            {
-                return save_to_collada(filepath, can_overwrite);
-            }
-        }
+        auto write(std::filesystem::path const& filepath, bool can_overwrite = false) const noexcept -> write_error;
 
     private:
 

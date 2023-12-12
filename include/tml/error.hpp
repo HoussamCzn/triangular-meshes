@@ -13,6 +13,7 @@ namespace tml
         file_not_found,
         file_already_exists,
         unknown_io_error,
+        unsupported_format,
         invalid_data,
         invalid_filepath,
     };
@@ -22,6 +23,7 @@ namespace tml
         "The file or directory does not exist"sv,
         "The specified file already exists"sv,
         "An unknown I/O error occurred"sv,
+        "The provided file format is not supported"sv,
         "Read data is invalid, the file might be corrupted"sv,
         "The provided filepath is not valid"sv,
     };

@@ -1,5 +1,6 @@
 #include "tml/mesh.hpp"
 
+#include "tml/edge.hpp" // tml::edge
 #include "tml/vec3.hpp" // tml::vec3
 
 #include <algorithm> // std::min, std::max
@@ -9,7 +10,6 @@
 #include <pugixml.hpp> // pugi::xml_document, pugi::xml_parse_result
 #include <random> // std::mt19937, std::uniform_real_distribution, std::random_device
 #include <ranges> // std::views::iota
-#include <sstream> // std::istringstream
 #include <stdexcept> // std::runtime_error
 #include <tuple> // std::tuple
 #include <unordered_map> // std::unordered_map
@@ -35,10 +35,6 @@ mesh::mesh(std::filesystem::path const& filepath)
     {
         error = load_from_collada(filepath).code;
     }
-    else [[unlikely]]
-    {
-        throw std::runtime_error{fmt::format("Failed to load mesh: Unsupported file extension")};
-    }
 
     if (error) [[unlikely]]
     {
@@ -46,9 +42,9 @@ mesh::mesh(std::filesystem::path const& filepath)
     }
 }
 
-auto mesh::vertices() const noexcept -> std::span<vertex const> { return m_vertices; }
+auto mesh::vertices() const noexcept -> std::vector<vertex> const& { return m_vertices; }
 
-auto mesh::faces() const noexcept -> std::span<face const> { return m_faces; }
+auto mesh::faces() const noexcept -> std::vector<face> const& { return m_faces; }
 
 auto mesh::area() const noexcept -> float
 {
@@ -65,6 +61,19 @@ auto mesh::area() const noexcept -> float
     });
 
     return area;
+}
+
+auto mesh::is_closed() const noexcept -> bool
+{
+    std::unordered_map<edge, std::size_t> edges;
+    std::ranges::for_each(m_faces, [&edges](face const& face) -> void {
+        auto const [index_v1, index_v2, index_v3] = face.indices();
+        ++edges[{std::min(index_v1, index_v2), std::max(index_v1, index_v2)}];
+        ++edges[{std::min(index_v1, index_v3), std::max(index_v1, index_v3)}];
+        ++edges[{std::min(index_v2, index_v3), std::max(index_v2, index_v3)}];
+    });
+
+    return std::ranges::all_of(edges, [](auto const& edge) -> bool { return edge.second == 2UL; });
 }
 
 auto mesh::center() noexcept -> mesh&
@@ -103,6 +112,105 @@ auto mesh::noise(float coefficient) noexcept -> mesh&
     });
 
     return *this;
+}
+
+auto mesh::subdivide() noexcept -> mesh&
+{
+    std::vector<vertex> new_vertices;
+    std::vector<face> new_faces;
+    std::unordered_map<edge, std::size_t> edge_to_midpoint;
+    std::size_t const vertex_count = m_vertices.size();
+    std::size_t const face_count = m_faces.size();
+
+    new_vertices.reserve(vertex_count + face_count);
+    new_faces.reserve(face_count * 4);
+
+    std::ranges::for_each(m_vertices, [&](vertex const& vertex) -> void {
+        vec3 const v{vertex.x(), vertex.y(), vertex.z()};
+        std::size_t const n = vertex.neighbors().size();
+        auto const accumulator = [this](vec3 const& sum, std::size_t const neighbor) -> vec3 {
+            return sum + vec3{m_vertices[neighbor].x(), m_vertices[neighbor].y(), m_vertices[neighbor].z()};
+        };
+        auto const sum = std::accumulate(vertex.neighbors().begin(), vertex.neighbors().end(), vec3{.0F, .0F, .0F}, accumulator);
+        float const alpha = (n == 3) ? 3.0F / 16.0F : 3.0F / (8.0F * n);
+        new_vertices.emplace_back(v.x() * (1.0F - n * alpha) + sum.x() * alpha, v.y() * (1.0F - n * alpha) + sum.y() * alpha,
+                                  v.z() * (1.0F - n * alpha) + sum.z() * alpha);
+    });
+
+    std::ranges::for_each(m_faces, [&](face const& face) -> void {
+        auto const [index_v1, index_v2, index_v3] = face.indices();
+        std::size_t const index_v4 = new_vertices.size();
+        new_vertices.emplace_back((m_vertices[index_v1].x() + m_vertices[index_v2].x() + m_vertices[index_v3].x()) / 3.0F,
+                                  (m_vertices[index_v1].y() + m_vertices[index_v2].y() + m_vertices[index_v3].y()) / 3.0F,
+                                  (m_vertices[index_v1].z() + m_vertices[index_v2].z() + m_vertices[index_v3].z()) / 3.0F);
+        edge_to_midpoint[{std::min(index_v1, index_v2), std::max(index_v1, index_v2)}] = index_v4;
+        edge_to_midpoint[{std::min(index_v1, index_v3), std::max(index_v1, index_v3)}] = index_v4;
+        edge_to_midpoint[{std::min(index_v2, index_v3), std::max(index_v2, index_v3)}] = index_v4;
+    });
+
+    std::ranges::for_each(m_faces, [&](face const& face) -> void {
+        auto const [index_v1, index_v2, index_v3] = face.indices();
+        std::size_t const index_v4 = edge_to_midpoint[{std::min(index_v1, index_v2), std::max(index_v1, index_v2)}];
+        std::size_t const index_v5 = edge_to_midpoint[{std::min(index_v1, index_v3), std::max(index_v1, index_v3)}];
+        std::size_t const index_v6 = edge_to_midpoint[{std::min(index_v2, index_v3), std::max(index_v2, index_v3)}];
+        new_faces.emplace_back(index_v1, index_v4, index_v5);
+        new_faces.emplace_back(index_v2, index_v6, index_v4);
+        new_faces.emplace_back(index_v3, index_v5, index_v6);
+        new_faces.emplace_back(index_v4, index_v6, index_v5);
+    });
+
+    m_vertices = std::move(new_vertices);
+    m_faces = std::move(new_faces);
+
+    return *this;
+}
+
+auto mesh::read(std::filesystem::path const& filepath) noexcept -> parse_error
+{
+    parse_error error;
+
+    if (filepath.extension() == ".ply")
+    {
+        error = load_from_ply(filepath);
+    }
+    else if (filepath.extension() == ".stl")
+    {
+        error = load_from_stl(filepath);
+    }
+    else if (filepath.extension() == ".dae")
+    {
+        error = load_from_collada(filepath);
+    }
+    else [[unlikely]]
+    {
+        return parse_error{.code = error_code::unsupported_format};
+    }
+
+    return error;
+}
+
+auto mesh::write(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> write_error
+{
+    write_error error;
+
+    if (filepath.extension() == ".ply")
+    {
+        error = save_to_ply(filepath, can_overwrite);
+    }
+    else if (filepath.extension() == ".stl")
+    {
+        error = save_to_stl(filepath, can_overwrite);
+    }
+    else if (filepath.extension() == ".dae")
+    {
+        error = save_to_collada(filepath, can_overwrite);
+    }
+    else [[unlikely]]
+    {
+        return write_error{.code = error_code::unsupported_format};
+    }
+
+    return error;
 }
 
 auto mesh::save_to_ply(std::filesystem::path const& filepath, bool can_overwrite) const noexcept -> write_error
